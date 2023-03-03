@@ -1,7 +1,7 @@
 package model
 
 type User struct {
-	ID int `gorm:"primaryKey; autoIncrement"`
+	UserID int `gorm:"primaryKey; autoIncrement"`
 	NamaUser string `gorm:"not null"`
 	Role userPriv `sql:"type:ENUM('ADMIN', 'KASIR', 'MANAJER')" gorm:"not null"`
 	Username string `gorm:"not null"`

@@ -1,5 +1,6 @@
 package model
 
 type Meja struct {
-	ID int `gorm:"primaryKey; autoIncrement"`
+	MejaID int `gorm:"primaryKey; autoIncrement"`
+	NomorMeja string
 }
