@@ -1,0 +1,9 @@
+.env
+/.vscode
+
+# VS Code SQL Tool
+ukekeh.session.sql
+
+# Air
+.air.toml
+/tmp
