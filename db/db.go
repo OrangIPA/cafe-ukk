@@ -22,4 +22,8 @@ func ConnectToDatabase() {
 
 func SyncDB() {
 	DB.AutoMigrate(&model.User{})
+	DB.AutoMigrate(&model.Transaksi{})
+	DB.AutoMigrate(&model.Meja{})
+	DB.AutoMigrate(&model.Menu{})
+	DB.AutoMigrate(&model.DetailTransaksi{})
 }
