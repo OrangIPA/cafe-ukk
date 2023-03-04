@@ -1,17 +1,10 @@
 package model
 
 type User struct {
-	UserID   int      `gorm:"primaryKey; autoIncrement"`
-	NamaUser string   `gorm:"not null"`
-	Role     userPriv `sql:"type:ENUM('ADMIN', 'KASIR', 'MANAJER')" gorm:"not null"`
-	Username string   `gorm:"not null"`
-	Password string   `gorm:"not null"`
+	UserID    uint   `json:"userId" gorm:"primaryKey; autoIncrement"`
+	NamaUser  string `json:"namaUser" gorm:"not null"`
+	Role      string `json:"role" gorm:"type:enum('admin', 'manager', 'kasir'); default:'kasir'; not null"`
+	Username  string `json:"username" gorm:"not null"`
+	Password  string `json:"password" gorm:"not null"`
+	Transaksi []Transaksi
 }
-
-type userPriv string
-
-const (
-	ADMIN   userPriv = "ADMIN"
-	KASIR   userPriv = "KASIR"
-	MANAJER userPriv = "MANAJER"
-)

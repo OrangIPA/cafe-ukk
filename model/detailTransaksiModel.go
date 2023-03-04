@@ -1,8 +1,8 @@
 package model
 
 type DetailTransaksi struct {
-	DetailTransaksiID int       `gorm:"primaryKey"`
-	Transaksi         Transaksi `gorm:"foreignKey: TransaksiID; not null"`
-	Menu              Menu      `gorm:"foreignKey: MenuID; not null"`
-	Harga             int       `gorm:"not null"`
+	DetailTransaksiID uint `json:"detailTransasksiId" gorm:"primaryKey; autoIncrement"`
+	TransaksiID       uint `json:"transaksiId" gorm:"not null"`
+	MenuID            uint `json:"menuId" gorm:"not null"`
+	Harga             int  `json:"harga" gorm:"not null"`
 }

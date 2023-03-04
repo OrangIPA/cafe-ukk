@@ -1,17 +1,11 @@
 package model
 
 type Menu struct {
-	MenuID    int          `gorm:"primaryKey; autoIncrement"`
-	NamaMenu  string       `gorm:"not null"`
-	Jenis     JenisPesanan `sql:"type:ENUM('MAKANAN','MINUMAN')" gorm:"not null"`
-	Deskripsi string
-	Gambar    string
-	Harga     int `gorm:"not null"`
+	MenuID          uint   `json:"menuId" gorm:"primaryKey; autoIncrement"`
+	NamaMenu        string `json:"namaMenu" gorm:"not null"`
+	Jenis           string `json:"jenis" gorm:"type:enum('makanan', 'minuman'); not null"`
+	Deskripsi       string `json:"deskripsi"`
+	Gambar          string `json:"gambar"`
+	Harga           int    `json:"harga" gorm:"not null"`
+	DetailTransaksi []DetailTransaksi
 }
-
-type JenisPesanan string
-
-const (
-	MAKANAN JenisPesanan = "MAKANAN"
-	MINUMAN JenisPesanan = "MINUMAN"
-)

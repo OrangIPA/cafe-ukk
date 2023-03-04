@@ -1,6 +1,7 @@
 package model
 
 type Meja struct {
-	MejaID    int `gorm:"primaryKey; autoIncrement"`
-	NomorMeja string
+	MejaID    uint   `json:"mejaId" gorm:"primaryKey; autoIncrement"`
+	NomorMeja string `json:"nomorMeja" gorm:"not null"`
+	Transaksi []Transaksi
 }
