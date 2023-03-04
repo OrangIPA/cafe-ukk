@@ -6,5 +6,12 @@ import (
 )
 
 func Routes(app *fiber.App) {
-	app.Get("/", controller.PostIndex)
+	app.Post("/", controller.NyobakAPI)
+
+	app.Post("/user", controller.CreateUser)
+
+	app.Use(func(c *fiber.Ctx) error {
+		c.SendStatus(404) // => 404 "Not Found"
+		return nil
+	})
 }
