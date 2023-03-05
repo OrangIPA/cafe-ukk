@@ -11,10 +11,18 @@ import (
 )
 
 type CreateUserParams struct {
-	NamaUser string `json:"namaUser"`
-	Role     string `json:"role"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	NamaUser string `form:"namaUser"`
+	Role     string `form:"role"`
+	Username string `form:"username"`
+	Password string `form:"password"`
+}
+
+type UpdateUserParams struct {
+	UserID   int    `form:"UserId"`
+	NamaUser string `form:"namaUser"`
+	Role     string `form:"role"`
+	Username string `form:"username"`
+	Password string `form:"password"`
 }
 
 func CreateUser(c *fiber.Ctx) error {
@@ -30,7 +38,7 @@ func CreateUser(c *fiber.Ctx) error {
 	// Parse body
 	u := new(CreateUserParams)
 	if err := c.BodyParser(u); err != nil {
-		return err
+		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
 	// Return if any of the params is empty
@@ -56,13 +64,68 @@ func CreateUser(c *fiber.Ctx) error {
 	hashedPass := h.Sum(nil)
 	hexPass := hex.EncodeToString(hashedPass)
 
-	// Query to database
+	// Create entry model
 	newUser := model.User{NamaUser: u.NamaUser, Role: u.Role, Username: u.Username, Password: hexPass}
 
-	// Return the error if any
+	// Create the entry and return the error if any
 	err := db.DB.Create(&newUser).Error
 	if err != nil {
 		return err
 	}
 	return c.Status(201).Send([]byte("User created"))
 }
+
+func GetAllUser(c *fiber.Ctx) error {
+	// Get token claims
+	claims := helper.TokenClaims(c)
+	role := claims["role"].(string)
+
+	// Return if role is not admin
+	if role != "admin" {
+		return c.SendStatus(fiber.StatusUnauthorized)
+	}
+
+	// Query to database
+	var users []model.User
+	db.DB.Find(&users)
+
+	// Return the users
+	return c.JSON(users)
+}
+
+func GetUserById(c *fiber.Ctx) error {
+	// Get token claims
+	claims := helper.TokenClaims(c)
+	role := claims["role"].(string)
+
+	// Return of role isn't admin
+	if role != "admin" {
+		return c.SendStatus(fiber.StatusUnauthorized)
+	}
+
+	// Query to database
+	var user model.User
+	db.DB.First(&user, c.Params("id"))
+
+	return c.JSON(user)
+}
+
+// func UpdateUser(c *fiber.Ctx) error {
+// 	// Get token claims
+// 	claims := helper.TokenClaims(c)
+// 	role := claims["role"].(string)
+
+// 	// Return if role is not admin
+// 	if role != "admin" {
+// 		return c.SendStatus(fiber.StatusUnauthorized)
+// 	}
+
+// 	// Parse body
+// 	user := new(UpdateUserParams)
+// 	if err := c.BodyParser(user); err != nil {
+// 		return err
+// 	}
+
+// 	// Return if any of the params is empty
+// 	if user.UserID !-
+// }
