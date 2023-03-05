@@ -3,10 +3,12 @@ package controller
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 
 	"github.com/OrangIPA/ukekehfrozekakhyr/db"
 	"github.com/OrangIPA/ukekehfrozekakhyr/helper"
 	"github.com/OrangIPA/ukekehfrozekakhyr/model"
+	"github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -18,7 +20,7 @@ type CreateUserParams struct {
 }
 
 type UpdateUserParams struct {
-	UserID   int    `form:"UserId"`
+	UserID   uint    `form:"userId"`
 	NamaUser string `form:"namaUser"`
 	Role     string `form:"role"`
 	Username string `form:"username"`
@@ -47,13 +49,15 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 
 	// Return if role is neither admin, manajer, or kasir
-	if u.Role != "admin" && u.Role != "manajer" && u.Role != "kasir" {
+	if u.Role != "admin" && u.Role != "manager" && u.Role != "kasir" {
 		return c.Status(fiber.StatusBadRequest).Send([]byte("Bad request: invalid role"))
 	}
 
 	// Return if username is already exist
 	var users []model.User
-	db.DB.Where("username = ?", u.Username).Find(&users)
+	if err := db.DB.Where("username = ?", u.Username).Find(&users).Error; err != nil {
+		return err
+	}
 	if len(users) > 0 {
 		return c.Status(fiber.StatusConflict).Send([]byte("Username already exist"))
 	}
@@ -87,7 +91,9 @@ func GetAllUser(c *fiber.Ctx) error {
 
 	// Query to database
 	var users []model.User
-	db.DB.Find(&users)
+	if err := db.DB.Find(&users).Error; err != nil {
+		return err
+	}
 
 	// Return the users
 	return c.JSON(users)
@@ -105,27 +111,60 @@ func GetUserById(c *fiber.Ctx) error {
 
 	// Query to database
 	var user model.User
-	db.DB.First(&user, c.Params("id"))
+	if err := db.DB.First(&user, c.Params("id")).Error; err != nil {
+		return err
+	}
 
 	return c.JSON(user)
 }
 
-// func UpdateUser(c *fiber.Ctx) error {
-// 	// Get token claims
-// 	claims := helper.TokenClaims(c)
-// 	role := claims["role"].(string)
+func UpdateUser(c *fiber.Ctx) error {
+	// Get token claims
+	claims := helper.TokenClaims(c)
+	role := claims["role"].(string)
 
-// 	// Return if role is not admin
-// 	if role != "admin" {
-// 		return c.SendStatus(fiber.StatusUnauthorized)
-// 	}
+	// Return if role is not admin
+	if role != "admin" {
+		return c.SendStatus(fiber.StatusUnauthorized)
+	}
 
-// 	// Parse body
-// 	user := new(UpdateUserParams)
-// 	if err := c.BodyParser(user); err != nil {
-// 		return err
-// 	}
+	// Parse body
+	user := new(UpdateUserParams)
+	if err := c.BodyParser(user); err != nil {
+		return err
+	}
 
-// 	// Return if any of the params is empty
-// 	if user.UserID !-
-// }
+	// Return if any of the params is empty
+	if user.UserID == 0 || user.NamaUser == "" || user.Password == "" || user.Role == "" || user.Username == "" {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+
+	// Return if role is neither admin, manajer, or kasir
+	if user.Role != "admin" && user.Role != "manager" && user.Role != "kasir" {
+		return c.Status(fiber.StatusBadRequest).Send([]byte("Bad request: invalid role"))
+	}
+
+	// Hash the password with SHA-256
+	h := sha256.New()
+	h.Write([]byte(user.Password))
+	hashedPass := h.Sum(nil)
+	hexPass := hex.EncodeToString(hashedPass)
+
+	// Update the user
+	u := model.User{
+		UserID:   user.UserID,
+		NamaUser: user.NamaUser,
+		Role:     user.Role,
+		Username: user.Username,
+		Password: hexPass,
+	}
+	if err := db.DB.Save(&u).Error; err != nil {
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+			return c.Status(fiber.StatusBadRequest).SendString("nothing is changed")
+		}
+		return err
+	}
+
+	return c.SendStatus(fiber.StatusOK)
+}

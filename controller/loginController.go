@@ -31,7 +31,9 @@ func LoginUser(c *fiber.Ctx) error {
 
 	// Get user password
 	var users []model.User = nil
-	db.DB.Where("username = ?", u.Username).Find(&users)
+	if err := db.DB.Where("username = ?", u.Username).Find(&users).Error; err != nil {
+		return err
+	}
 	if len(users) < 1 {
 		return c.Status(401).Send([]byte("Username doesn't exist"))
 	}

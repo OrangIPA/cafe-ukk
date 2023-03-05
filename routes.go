@@ -20,6 +20,7 @@ func Routes(app *fiber.App) {
 	app.Get("/user", controller.GetAllUser)
 	app.Get("/user/:id", controller.GetUserById)
 	app.Post("/user", controller.CreateUser)
+	app.Put("/user", controller.UpdateUser)
 
 	// MENU
 	app.Post("/menu", controller.CreateMenu)
