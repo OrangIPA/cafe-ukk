@@ -5,9 +5,9 @@ import (
 	"encoding/hex"
 
 	"github.com/OrangIPA/ukekehfrozekakhyr/db"
+	"github.com/OrangIPA/ukekehfrozekakhyr/helper"
 	"github.com/OrangIPA/ukekehfrozekakhyr/model"
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v4"
 )
 
 type CreateUserParams struct {
@@ -18,12 +18,13 @@ type CreateUserParams struct {
 }
 
 func CreateUser(c *fiber.Ctx) error {
-	// Token Authorization
-	user := c.Locals("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
+	// Get token claims
+	claims := helper.TokenClaims(c)
 	role := claims["role"].(string)
+
+	// Return if role is not admin
 	if role != "admin" {
-		return c.SendStatus(401)
+		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 
 	// Parse body
@@ -34,7 +35,7 @@ func CreateUser(c *fiber.Ctx) error {
 
 	// Return if any of the params is empty
 	if u.NamaUser == "" || u.Password == "" || u.Role == "" || u.Username == "" {
-		return c.Status(fiber.StatusBadRequest).Send([]byte("Bad request"))
+		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
 	// Return if role is neither admin, manajer, or kasir
