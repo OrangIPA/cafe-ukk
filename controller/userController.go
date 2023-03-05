@@ -7,17 +7,25 @@ import (
 	"github.com/OrangIPA/ukekehfrozekakhyr/db"
 	"github.com/OrangIPA/ukekehfrozekakhyr/model"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type CreateUserParams struct {
 	NamaUser string `json:"namaUser"`
-	Role     string	`json:"role"`
-	Username string	`json:"username"`
-	Password string	`json:"password"`
+	Role     string `json:"role"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 func CreateUser(c *fiber.Ctx) error {
-	// log.Println(c.Request())
+	// Token Authorization
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	role := claims["role"].(string)
+	if role != "admin" {
+		return c.SendStatus(401)
+	}
+
 	// Parse body
 	u := new(CreateUserParams)
 	if err := c.BodyParser(u); err != nil {
@@ -26,12 +34,19 @@ func CreateUser(c *fiber.Ctx) error {
 
 	// Return if any of the params is empty
 	if u.NamaUser == "" || u.Password == "" || u.Role == "" || u.Username == "" {
-		return c.Status(400).Send([]byte("Bad request"))
+		return c.Status(fiber.StatusBadRequest).Send([]byte("Bad request"))
 	}
 
 	// Return if role is neither admin, manajer, or kasir
 	if u.Role != "admin" && u.Role != "manajer" && u.Role != "kasir" {
-		return c.Status(400).Send([]byte("Bad request"))
+		return c.Status(fiber.StatusBadRequest).Send([]byte("Bad request: invalid role"))
+	}
+
+	// Return if username is already exist
+	var users []model.User
+	db.DB.Where("username = ?", u.Username).Find(&users)
+	if len(users) > 0 {
+		return c.Status(fiber.StatusConflict).Send([]byte("Username already exist"))
 	}
 
 	// Hash the password with SHA-256
@@ -39,7 +54,7 @@ func CreateUser(c *fiber.Ctx) error {
 	h.Write([]byte(u.Password))
 	hashedPass := h.Sum(nil)
 	hexPass := hex.EncodeToString(hashedPass)
-	
+
 	// Query to database
 	newUser := model.User{NamaUser: u.NamaUser, Role: u.Role, Username: u.Username, Password: hexPass}
 

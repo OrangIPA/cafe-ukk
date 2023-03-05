@@ -29,6 +29,12 @@ func main() {
 	// Routes
 	Routes(app)
 
+	// Not Found
+	app.Use(func(c *fiber.Ctx) error {
+		c.SendStatus(404) // => 404 "Not Found"
+		return nil
+	})
+
 	// Start app
 	app.Listen(":" + os.Getenv("PORT"))
 }
