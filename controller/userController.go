@@ -150,7 +150,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	hashedPass := h.Sum(nil)
 	hexPass := hex.EncodeToString(hashedPass)
 
-	// Update the user
+	// Create entry model
 	u := model.User{
 		UserID:   user.UserID,
 		NamaUser: user.NamaUser,
@@ -158,6 +158,8 @@ func UpdateUser(c *fiber.Ctx) error {
 		Username: user.Username,
 		Password: hexPass,
 	}
+
+	// Update the menu and return error if any
 	if err := db.DB.Save(&u).Error; err != nil {
 		var mysqlErr *mysql.MySQLError
 		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {

@@ -1,21 +1,16 @@
 package main
 
 import (
-	"os"
-
 	"github.com/OrangIPA/ukekehfrozekakhyr/controller"
 	"github.com/gofiber/fiber/v2"
-	jwtware "github.com/gofiber/jwt/v3"
 )
 
 func Routes(app *fiber.App) {
 	app.Post("/login", controller.LoginUser)
 
-	// JWT Middleware: Put every route that require JWT AFTER this
-	app.Use(jwtware.New(jwtware.Config{
-		SigningKey: []byte(os.Getenv("JWT_KEY")),
-	}))
+}
 
+func RestrictedRoutes(app *fiber.App) {
 	// USER
 	app.Get("/user", controller.GetAllUser)
 	app.Get("/user/:id", controller.GetUserById)
@@ -24,5 +19,9 @@ func Routes(app *fiber.App) {
 	app.Delete("/user", controller.DeleteUser)
 
 	// MENU
+	app.Get("/menu", controller.GetAllMenu)
+	app.Get("/menu/:id", controller.GetMenuById)
 	app.Post("/menu", controller.CreateMenu)
+	app.Put("/menu", controller.UpdateMenu)
+
 }

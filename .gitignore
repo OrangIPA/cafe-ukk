@@ -1,5 +1,6 @@
 .env
 /.vscode
+/public/gambarmenu/*
 
 # VS Code SQL Tool
 ukekeh.session.sql

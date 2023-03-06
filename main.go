@@ -5,6 +5,7 @@ import (
 
 	"github.com/OrangIPA/ukekehfrozekakhyr/db"
 	"github.com/gofiber/fiber/v2"
+	jwtware "github.com/gofiber/jwt/v3"
 	"github.com/gofiber/template/html"
 )
 
@@ -28,6 +29,14 @@ func main() {
 
 	// Routes
 	Routes(app)
+
+	// JWT Middleware: Put every route that require JWT AFTER this
+	app.Use(jwtware.New(jwtware.Config{
+		SigningKey: []byte(os.Getenv("JWT_KEY")),
+	}))
+
+	// Restricted routes: routes that need JWT Token
+	RestrictedRoutes(app)
 
 	// Not Found
 	app.Use(func(c *fiber.Ctx) error {
