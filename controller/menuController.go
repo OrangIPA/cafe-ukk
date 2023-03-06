@@ -13,19 +13,11 @@ import (
 	"gorm.io/gorm"
 )
 
-type CreateMenuParams struct {
+type MenuParams struct {
 	NamaMenu  string `form:"namaMenu"`
 	Jenis     string `form:"jenis"`
 	Deskripsi string `form:"deskripsi"`
 	Harga     int    `form:"harga"`
-}
-
-type UpdateMenuParams struct {
-	MenuId uint	`form:"menuId"`
-	NamaMenu string `form:"namaMenu"`
-	Jenis	string `form:"jenis"`
-	Deskripsi string `form:"deskripsi"`
-	Harga int	`form:"harga"`
 }
 
 func CreateMenu(c *fiber.Ctx) error {
@@ -55,7 +47,7 @@ func CreateMenu(c *fiber.Ctx) error {
 	}
 
 	// Parse body
-	m := new(CreateMenuParams)
+	m := new(MenuParams)
 	if err := c.BodyParser(m); err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
@@ -124,6 +116,13 @@ func UpdateMenu(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 
+	// Get request id
+	menuIdBef, err := strconv.ParseUint(c.Params("id"), 10, 64)
+	if err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+	menuId := uint(menuIdBef)
+
 	// Get gammbar if any, if there isn't, set isGambarChanged to false
 	isGambarChanged := true
 	gambar, err := c.FormFile("gambar")
@@ -145,7 +144,7 @@ func UpdateMenu(c *fiber.Ctx) error {
 	}
 
 	// Parse body
-	menu := new(UpdateMenuParams)
+	menu := new(MenuParams)
 	if err := c.BodyParser(menu); err != nil {
 		return err
 	}
@@ -156,17 +155,17 @@ func UpdateMenu(c *fiber.Ctx) error {
 	}
 
 	// Return if any of the params is empty
-	if menu.MenuId == 0 || menu.NamaMenu == "" || menu.Harga == 0 {
+	if menu.NamaMenu == "" || menu.Harga == 0 {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
 	// Query for unchanged gambar
 	if !isGambarChanged {
 		// Create menu model
-		updatedMenu := model.Menu{MenuID: menu.MenuId, NamaMenu: menu.NamaMenu, Jenis: menu.Jenis, Deskripsi: menu.Deskripsi, Harga: menu.Harga}
+		updatedMenu := model.Menu{NamaMenu: menu.NamaMenu, Jenis: menu.Jenis, Deskripsi: menu.Deskripsi, Harga: menu.Harga}
 		
 		// Query to database and handle the error
-		if err := db.DB.Model(&model.Menu{MenuID: menu.MenuId}).Omit("gambar").Updates(updatedMenu).Error; err != nil {
+		if err := db.DB.Model(&model.Menu{MenuID: menuId}).Omit("gambar").Updates(updatedMenu).Error; err != nil {
 			return err
 		}
 		return c.SendStatus(fiber.StatusOK)
@@ -185,7 +184,7 @@ func UpdateMenu(c *fiber.Ctx) error {
 	updatedMenu := model.Menu{NamaMenu: menu.NamaMenu, Jenis: menu.Jenis, Deskripsi: menu.Deskripsi, Gambar: title, Harga: menu.Harga}
 
 	// Update the menu and return error if any
-	if err := db.DB.Model(&model.Menu{MenuID: menu.MenuId}).Updates(updatedMenu).Error; err != nil {
+	if err := db.DB.Model(&model.Menu{MenuID: menuId}).Updates(updatedMenu).Error; err != nil {
 		return err
 	}
 	return c.SendStatus(fiber.StatusOK)
