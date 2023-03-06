@@ -16,7 +16,7 @@ func RestrictedRoutes(app *fiber.App) {
 	app.Get("/user/:id", controller.GetUserById)
 	app.Post("/user", controller.CreateUser)
 	app.Put("/user", controller.UpdateUser)
-	app.Delete("/user", controller.DeleteUser)
+	app.Delete("/user/:id", controller.DeleteUser)
 
 	// MENU
 	app.Get("/menu", controller.GetAllMenu)

@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"strconv"
 
 	"github.com/OrangIPA/ukekehfrozekakhyr/db"
 	"github.com/OrangIPA/ukekehfrozekakhyr/helper"
@@ -181,8 +182,13 @@ func DeleteUser(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 
-	// get UserID, query it to database and return the error if any
-	userId := c.FormValue("userId")
+	// Get UserId, parse it into int, and return 400 if failed to parse
+	userId, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+
+	// Query to database and return the error if any
 	if err := db.DB.Delete(&model.User{}, userId).Error; err != nil {
 		return err
 	}
