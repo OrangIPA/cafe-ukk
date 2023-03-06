@@ -1,10 +1,13 @@
 package controller
 
 import (
+	"errors"
+
 	"github.com/OrangIPA/ukekehfrozekakhyr/db"
 	"github.com/OrangIPA/ukekehfrozekakhyr/helper"
 	"github.com/OrangIPA/ukekehfrozekakhyr/model"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 func CreateMeja(c *fiber.Ctx) error {
@@ -48,6 +51,9 @@ func GetMejaById(c *fiber.Ctx) error {
 	// Query to database and return the error if any
 	var meja model.Meja
 	if err := db.DB.First(&meja, mejaId).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.SendStatus(fiber.StatusNotFound)
+		}
 		return err
 	}
 

@@ -11,6 +11,7 @@ import (
 	"github.com/OrangIPA/ukekehfrozekakhyr/model"
 	"github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 type CreateUserParams struct {
@@ -113,6 +114,9 @@ func GetUserById(c *fiber.Ctx) error {
 	// Query to database
 	var user model.User
 	if err := db.DB.First(&user, c.Params("id")).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.SendStatus(fiber.StatusNotFound)
+		}
 		return err
 	}
 
