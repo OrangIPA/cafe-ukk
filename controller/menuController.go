@@ -123,7 +123,7 @@ func UpdateMenu(c *fiber.Ctx) error {
 	}
 	menuId := uint(menuIdBef)
 
-	// Return 404 if menu is not available
+	// Return 404 if menu doesn't exist
 	var testMenu model.Menu
 	if err := db.DB.First(&testMenu, menuId).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

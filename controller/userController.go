@@ -9,20 +9,11 @@ import (
 	"github.com/OrangIPA/ukekehfrozekakhyr/db"
 	"github.com/OrangIPA/ukekehfrozekakhyr/helper"
 	"github.com/OrangIPA/ukekehfrozekakhyr/model"
-	"github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
-type CreateUserParams struct {
-	NamaUser string `form:"namaUser"`
-	Role     string `form:"role"`
-	Username string `form:"username"`
-	Password string `form:"password"`
-}
-
-type UpdateUserParams struct {
-	UserID   uint   `form:"userId"`
+type UserParams struct {
 	NamaUser string `form:"namaUser"`
 	Role     string `form:"role"`
 	Username string `form:"username"`
@@ -40,7 +31,7 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 
 	// Parse body
-	u := new(CreateUserParams)
+	u := new(UserParams)
 	if err := c.BodyParser(u); err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
@@ -134,13 +125,29 @@ func UpdateUser(c *fiber.Ctx) error {
 	}
 
 	// Parse body
-	user := new(UpdateUserParams)
+	user := new(UserParams)
 	if err := c.BodyParser(user); err != nil {
 		return err
 	}
 
+	// Get request id
+	userIdBef, err := strconv.ParseUint(c.Params("id"), 10, 64)
+	if err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+	userId := uint(userIdBef)
+
+	// Return 404 if user doesn't exist
+	var testUser model.User
+	if err := db.DB.First(&testUser, userId).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.SendStatus(fiber.StatusNotFound)
+		}
+		return err
+	}
+
 	// Return if any of the params is empty
-	if user.UserID == 0 || user.NamaUser == "" || user.Password == "" || user.Role == "" || user.Username == "" {
+	if user.NamaUser == "" || user.Password == "" || user.Role == "" || user.Username == "" {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
@@ -156,8 +163,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	hexPass := hex.EncodeToString(hashedPass)
 
 	// Create entry model
-	u := model.User{
-		UserID:   user.UserID,
+	updatedUser := model.User{
 		NamaUser: user.NamaUser,
 		Role:     user.Role,
 		Username: user.Username,
@@ -165,11 +171,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	}
 
 	// Update the menu and return error if any
-	if err := db.DB.Save(&u).Error; err != nil {
-		var mysqlErr *mysql.MySQLError
-		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
-			return c.Status(fiber.StatusBadRequest).SendString("nothing is changed")
-		}
+	if err := db.DB.Model(&model.User{UserID: userId}).Updates(&updatedUser).Error; err != nil {
 		return err
 	}
 
