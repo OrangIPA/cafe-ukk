@@ -29,3 +29,28 @@ func CreateMeja(c *fiber.Ctx) error {
 	// Return created
 	return c.SendStatus(fiber.StatusCreated)
 }
+
+func GetAllMeja(c *fiber.Ctx) error {
+	// Query to database and return the error if any
+	var mejas []model.Meja
+	if err := db.DB.Find(&mejas).Error; err != nil {
+		return err
+	}
+
+	// Return all mejas
+	return c.JSON(mejas)
+}
+
+func GetMejaById(c *fiber.Ctx) error {
+	// Get meja id
+	mejaId := c.Params("id")
+
+	// Query to database and return the error if any
+	var meja model.Meja
+	if err := db.DB.First(&meja, mejaId).Error; err != nil {
+		return err
+	}
+
+	// Return the meja
+	return c.JSON(meja)
+}
