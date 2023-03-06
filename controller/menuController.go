@@ -9,7 +9,6 @@ import (
 	"github.com/OrangIPA/ukekehfrozekakhyr/db"
 	"github.com/OrangIPA/ukekehfrozekakhyr/helper"
 	"github.com/OrangIPA/ukekehfrozekakhyr/model"
-	"github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
@@ -161,20 +160,19 @@ func UpdateMenu(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
+	// Query for unchanged gambar
 	if !isGambarChanged {
 		// Create menu model
 		updatedMenu := model.Menu{MenuID: menu.MenuId, NamaMenu: menu.NamaMenu, Jenis: menu.Jenis, Deskripsi: menu.Deskripsi, Harga: menu.Harga}
 		
 		// Query to database and handle the error
-		var mysqlErr *mysql.MySQLError
 		if err := db.DB.Model(&model.Menu{MenuID: menu.MenuId}).Omit("gambar").Updates(updatedMenu).Error; err != nil {
-			if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
-				return c.Status(fiber.StatusBadRequest).SendString("nothing is changed")
-			}
 			return err
 		}
 		return c.SendStatus(fiber.StatusOK)
 	}
+
+	// Query for changed gambar
 
 	// Write gambar to file system
 	if isGambarChanged {
@@ -184,14 +182,10 @@ func UpdateMenu(c *fiber.Ctx) error {
 	}
 
 	// Create entry model
-	updatedMenu := model.Menu{MenuID: menu.MenuId, NamaMenu: menu.NamaMenu, Jenis: menu.Jenis, Deskripsi: menu.Deskripsi, Gambar: title, Harga: menu.Harga}
+	updatedMenu := model.Menu{NamaMenu: menu.NamaMenu, Jenis: menu.Jenis, Deskripsi: menu.Deskripsi, Gambar: title, Harga: menu.Harga}
 
 	// Update the menu and return error if any
-	if err := db.DB.Save(&updatedMenu).Error; err != nil {
-		var mysqlErr *mysql.MySQLError
-		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
-			return c.Status(fiber.StatusBadRequest).SendString("nothing is changed")
-		}
+	if err := db.DB.Model(&model.Menu{MenuID: menu.MenuId}).Updates(updatedMenu).Error; err != nil {
 		return err
 	}
 	return c.SendStatus(fiber.StatusOK)
