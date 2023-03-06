@@ -21,7 +21,7 @@ type CreateUserParams struct {
 }
 
 type UpdateUserParams struct {
-	UserID   uint    `form:"userId"`
+	UserID   uint   `form:"userId"`
 	NamaUser string `form:"namaUser"`
 	Role     string `form:"role"`
 	Username string `form:"username"`
@@ -186,6 +186,12 @@ func DeleteUser(c *fiber.Ctx) error {
 	userId, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
+	}
+
+	// Check if menu is exist. if not, return 404
+	var user model.User
+	if err := db.DB.First(&user, userId).Error; err != nil {
+		return c.SendStatus(fiber.StatusNotFound)
 	}
 
 	// Query to database and return the error if any

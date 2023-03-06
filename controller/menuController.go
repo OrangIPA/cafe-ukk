@@ -3,6 +3,7 @@ package controller
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/OrangIPA/ukekehfrozekakhyr/db"
@@ -189,5 +190,35 @@ func UpdateMenu(c *fiber.Ctx) error {
 		}
 		return err
 	}
+	return c.SendStatus(fiber.StatusOK)
+}
+
+func DeleteMenu(c *fiber.Ctx) error {
+	// Get token claims
+	claims := helper.TokenClaims(c)
+	role := claims["role"].(string)
+
+	// Return if role is not admin
+	if role != "admin" {
+		return c.SendStatus(fiber.StatusUnauthorized)
+	}
+
+	// Get userId, parse it, and then return the error if any
+	menuId, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+
+	// Check if menu is exist. if not, return 404
+	var menu model.Menu
+	if err := db.DB.First(&menu, menuId).Error; err != nil {
+		return c.SendStatus(fiber.StatusNotFound)
+	}
+
+	// Query to database and return the error if any
+	if err := db.DB.Delete(&model.Menu{}, menuId).Error; err != nil {
+		return err
+	}
+
 	return c.SendStatus(fiber.StatusOK)
 }
