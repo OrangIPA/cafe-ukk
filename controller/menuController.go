@@ -123,6 +123,15 @@ func UpdateMenu(c *fiber.Ctx) error {
 	}
 	menuId := uint(menuIdBef)
 
+	// Return 404 if menu is not available
+	var testMenu model.Menu
+	if err := db.DB.First(&testMenu, menuId).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.SendStatus(fiber.StatusNotFound)
+		}
+		return err
+	}
+
 	// Get gammbar if any, if there isn't, set isGambarChanged to false
 	isGambarChanged := true
 	gambar, err := c.FormFile("gambar")
