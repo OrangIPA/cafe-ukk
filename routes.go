@@ -29,4 +29,6 @@ func RestrictedRoutes(app *fiber.App) {
 	app.Get("/meja", controller.GetAllMeja)
 	app.Get("/meja/:id", controller.GetMejaById)
 	app.Post("/meja", controller.CreateMeja)
+	app.Put("/meja/:id", controller.UpdateMeja)
+	app.Delete("/meja/:id", controller.DeleteMeja)
 }
