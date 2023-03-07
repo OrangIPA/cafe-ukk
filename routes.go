@@ -31,4 +31,7 @@ func RestrictedRoutes(app *fiber.App) {
 	app.Post("/meja", controller.CreateMeja)
 	app.Put("/meja/:id", controller.UpdateMeja)
 	app.Delete("/meja/:id", controller.DeleteMeja)
+
+	// TRANSAKSI
+	app.Post("/transaksi", controller.CreateTransaksi)
 }

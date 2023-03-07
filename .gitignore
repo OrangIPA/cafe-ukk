@@ -8,3 +8,4 @@ ukekeh.session.sql
 # Air
 .air.toml
 /air_tmp
+/tmp
