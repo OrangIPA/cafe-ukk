@@ -12,14 +12,14 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-type LoginUserParams struct {
+type loginUserParams struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
 func LoginUser(c *fiber.Ctx) error {
 	// Parse body
-	u := new(LoginUserParams)
+	u := new(loginUserParams)
 	if err := c.BodyParser(u); err != nil {
 		return err
 	}

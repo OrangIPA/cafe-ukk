@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type MenuParams struct {
+type menuParams struct {
 	NamaMenu  string `form:"namaMenu"`
 	Jenis     string `form:"jenis"`
 	Deskripsi string `form:"deskripsi"`
@@ -36,7 +36,9 @@ func CreateMenu(c *fiber.Ctx) error {
 	var menus []model.Menu
 	for {
 		db.DB.Find(&menus, "gambar = ?", title)
-		if len(menus) == 0 { break }
+		if len(menus) == 0 {
+			break
+		}
 		t := strings.Split(title, ".")
 		title = t[0] + "0." + t[1]
 	}
@@ -47,7 +49,7 @@ func CreateMenu(c *fiber.Ctx) error {
 	}
 
 	// Parse body
-	m := new(MenuParams)
+	m := new(menuParams)
 	if err := c.BodyParser(m); err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
@@ -101,7 +103,7 @@ func GetMenuById(c *fiber.Ctx) error {
 		}
 		return err
 	}
-	
+
 	// Return the menu
 	return c.JSON(menu)
 }
@@ -146,14 +148,16 @@ func UpdateMenu(c *fiber.Ctx) error {
 		var menus []model.Menu
 		for {
 			db.DB.Find(&menus, "gambar = ?", title)
-			if len(menus) == 0 { break }
+			if len(menus) == 0 {
+				break
+			}
 			t := strings.Split(title, ".")
 			title = t[0] + "0." + t[1]
 		}
 	}
 
 	// Parse body
-	menu := new(MenuParams)
+	menu := new(menuParams)
 	if err := c.BodyParser(menu); err != nil {
 		return err
 	}
@@ -172,7 +176,7 @@ func UpdateMenu(c *fiber.Ctx) error {
 	if !isGambarChanged {
 		// Create menu model
 		updatedMenu := model.Menu{NamaMenu: menu.NamaMenu, Jenis: menu.Jenis, Deskripsi: menu.Deskripsi, Harga: menu.Harga}
-		
+
 		// Query to database and handle the error
 		if err := db.DB.Model(&model.Menu{MenuID: menuId}).Omit("gambar").Updates(updatedMenu).Error; err != nil {
 			return err

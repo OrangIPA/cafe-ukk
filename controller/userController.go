@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserParams struct {
+type userParams struct {
 	NamaUser string `form:"namaUser"`
 	Role     string `form:"role"`
 	Username string `form:"username"`
@@ -31,7 +31,7 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 
 	// Parse body
-	u := new(UserParams)
+	u := new(userParams)
 	if err := c.BodyParser(u); err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
@@ -125,7 +125,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	}
 
 	// Parse body
-	user := new(UserParams)
+	user := new(userParams)
 	if err := c.BodyParser(user); err != nil {
 		return err
 	}
