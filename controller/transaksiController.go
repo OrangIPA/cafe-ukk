@@ -2,6 +2,7 @@ package controller
 
 import (
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/OrangIPA/ukekehfrozekakhyr/db"
@@ -74,6 +75,7 @@ func CreateTransaksi(c *fiber.Ctx) error {
 			return nil
 		}
 
+		// Transaction completed succesfully, return nil committing the transaction
 		return nil 
 	})
 	if err != nil {
@@ -81,4 +83,31 @@ func CreateTransaksi(c *fiber.Ctx) error {
 	}
 
 	return c.SendStatus(fiber.StatusCreated)
+}
+
+func UpdateTransaksiStatus(c *fiber.Ctx) error {
+	// Get token claims
+	claims := helper.TokenClaims(c)
+	role := claims["role"].(string)
+
+	// Return if insufficient role
+	if role != "kasir" {
+		return c.SendStatus(fiber.StatusUnauthorized)
+	}
+
+	// Get request info
+	id, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+	userId := uint(id)
+	status := c.FormValue("status")
+
+	// Query to database and return error if any
+	if err := db.DB.Model(&model.Transaksi{TransaksiID: userId}).Update("status", status).Error; err != nil {
+		return err
+	}
+
+	// Return OK
+	return c.SendStatus(fiber.StatusOK)
 }

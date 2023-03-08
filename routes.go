@@ -34,4 +34,5 @@ func RestrictedRoutes(app *fiber.App) {
 
 	// TRANSAKSI
 	app.Post("/transaksi", controller.CreateTransaksi)
+	app.Patch("/transaksi/:id", controller.UpdateTransaksiStatus)
 }
