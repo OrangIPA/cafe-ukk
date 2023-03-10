@@ -111,3 +111,81 @@ func UpdateTransaksiStatus(c *fiber.Ctx) error {
 	// Return OK
 	return c.SendStatus(fiber.StatusOK)
 }
+
+func GetAllTransaksi(c *fiber.Ctx) error {
+	// If query parameter for filtering not empty, pass task to GetAllTransaksiFilter
+	if c.Query("nama_karyawan") != "" || c.Query("from") != "" || c.Query("to") != "" {
+		return getTransaksiFilter(c)
+	}
+
+	// Query all transaksi from database
+	var transaksis []model.Transaksi
+	if err := db.DB.Find(&transaksis).Error; err != nil {
+		return err
+	}
+
+	// For each transaksi, query transaction detail from database then attach it to transaksi
+	for i, transaksi := range transaksis {
+		var dT []model.DetailTransaksi
+		if err := db.DB.Find(&dT, "transaksi_id = ?", transaksi.TransaksiID).Error; err != nil {
+			return err
+		}
+		transaksis[i].DetailTransaksi = dT
+	}
+
+	// Return all transaksi
+	return c.JSON(transaksis)
+}
+
+func GetTransaksiById(c *fiber.Ctx) error {
+	// Get id
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+
+	// Query transaksi based on the id
+	var transaksi model.Transaksi
+	if err := db.DB.First(&transaksi, model.Transaksi{TransaksiID: uint(id)}).Error; err != nil {
+		return err
+	}
+
+	// Query detail transaksi based on transaksi id then attach it to transaksi
+	var dT []model.DetailTransaksi
+	if err := db.DB.Find(&dT, "transaksi_id = ?", transaksi.TransaksiID).Error; err != nil {
+		return err
+	}
+	transaksi.DetailTransaksi = dT
+
+	// Return the transaksi
+	return c.JSON(transaksi)
+}
+
+func getTransaksiFilter(c *fiber.Ctx) error {
+	// Get query parameter
+	namaKaryawan := c.Query("nama_karyawan")
+	from, until := c.Query("dari"), c.Query("sampai")
+
+	// Parse tanggal
+	fromParsed, err := time.Parse("2-1-2006", from)
+	if err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+	untilParsed, err := time.Parse("2-1-2006", until)
+	if err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+	from = fromParsed.Format("2006-1-2")
+	until = untilParsed.Format("2006-1-2")
+
+	// Query transaksi
+	var t []model.Transaksi
+	namaKaryawan = "%" + namaKaryawan + "%"
+	err = db.DB.Joins("JOIN user ON user.user_id = transaksi.user_id").Where("user.nama_user LIKE ? AND transaksi.tgl_transaksi >= ? AND transaksi.tgl_transaksi <= ?", namaKaryawan, from, until).Find(&t).Error
+	if err != nil {
+		return err
+	}
+
+	// Return the result
+	return c.JSON(t)
+}
