@@ -95,6 +95,24 @@ func UpdateMeja(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
+func UpdateStatusMeja(c *fiber.Ctx) error {
+	// Get request info
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+	status := c.Params("status")
+	if status != "kosong" && status != "terisi" {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+
+	// Performm query
+	if err := db.DB.Model(&model.Meja{MejaID: uint(id)}).Update("status", status).Error; err != nil {
+		return err
+	}
+	return c.SendStatus(fiber.StatusOK)
+}
+
 func DeleteMeja(c *fiber.Ctx) error {
 	// Get token claims
 	claims := helper.TokenClaims(c)
