@@ -14,10 +14,10 @@ import (
 )
 
 type userParams struct {
-	NamaUser string `form:"namaUser"`
-	Role     string `form:"role"`
-	Username string `form:"username"`
-	Password string `form:"password"`
+	NamaUser string `form:"namaUser" json:"namaUser" xml:"namaUser"`
+	Role     string `form:"role" json:"role" xml:"role"`
+	Username string `form:"username" json:"username" xml:"username"`
+	Password string `form:"password" json:"password" xml:"password"`
 }
 
 func CreateUser(c *fiber.Ctx) error {

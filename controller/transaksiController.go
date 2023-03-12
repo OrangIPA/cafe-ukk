@@ -13,10 +13,10 @@ import (
 )
 
 type transaksiParams struct {
-	MejaID          uint                    `form:"mejaId" json:"mejaId"`
-	NamaPelanggan   string                  `form:"namaPelanggan" json:"namaPelanggan"`
-	Status          string                  `form:"status" json:"status"`
-	DetailTransaksi []detailTransaksiParams `form:"detailTranskasi" json:"detailTransaksi"`
+	MejaID          uint                    `form:"mejaId" json:"mejaId" xml:"mejaId"`
+	NamaPelanggan   string                  `form:"namaPelanggan" json:"namaPelanggan" xml:"namaPelanggan"`
+	Status          string                  `form:"status" json:"status" xml:"status"`
+	DetailTransaksi []detailTransaksiParams `form:"detailTranskasi" json:"detailTransaksi" xml:"detailTransaksi"`
 }
 
 type detailTransaksiParams struct {
