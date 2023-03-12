@@ -13,15 +13,15 @@ import (
 )
 
 type transaksiParams struct {
-	MejaID	uint `form:"mejaId" json:"mejaId"`
-	NamaPelanggan string `form:"namaPelanggan" json:"namaPelanggan"`
-	Status	string `form:"status" json:"status"`
+	MejaID          uint                    `form:"mejaId" json:"mejaId"`
+	NamaPelanggan   string                  `form:"namaPelanggan" json:"namaPelanggan"`
+	Status          string                  `form:"status" json:"status"`
 	DetailTransaksi []detailTransaksiParams `form:"detailTranskasi" json:"detailTransaksi"`
 }
 
 type detailTransaksiParams struct {
 	MenuID uint `json:"menuId" form:"menuId"`
-	Jumlah int `json:"jumlah" form:"jumlah"`
+	Jumlah int  `json:"jumlah" form:"jumlah"`
 }
 
 func CreateTransaksi(c *fiber.Ctx) error {
@@ -49,11 +49,11 @@ func CreateTransaksi(c *fiber.Ctx) error {
 	err := db.DB.Transaction(func(tx *gorm.DB) error {
 		// Create transaksi model
 		t := model.Transaksi{
-			TglTransaksi: time.Now(),
-			UserID: userId,
-			MejaID: transaksi.MejaID,
+			TglTransaksi:  time.Now(),
+			UserID:        userId,
+			MejaID:        transaksi.MejaID,
 			NamaPelanggan: transaksi.NamaPelanggan,
-			Status: transaksi.Status,
+			Status:        transaksi.Status,
 		}
 		// Query transaksi to database and get the primary key
 		if err := tx.Create(&t).Error; err != nil {
@@ -65,18 +65,18 @@ func CreateTransaksi(c *fiber.Ctx) error {
 		for _, detil := range transaksi.DetailTransaksi {
 			dT = append(dT, model.DetailTransaksi{
 				TransaksiID: t.TransaksiID,
-				MenuID: detil.MenuID,
-				Jumlah: detil.Jumlah,
+				MenuID:      detil.MenuID,
+				Jumlah:      detil.Jumlah,
 			})
 		}
 
-		// Query detailTransaksi to database and both return the error 
+		// Query detailTransaksi to database and both return the error
 		if err := tx.Create(&dT).Error; err != nil {
 			return nil
 		}
 
 		// Transaction completed succesfully, return nil committing the transaction
-		return nil 
+		return nil
 	})
 	if err != nil {
 		return err
