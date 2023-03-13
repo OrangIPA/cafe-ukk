@@ -12,30 +12,30 @@ func Routes(app *fiber.App) {
 
 func RestrictedRoutes(app *fiber.App) {
 	// USER
-	app.Get("/user", controller.GetAllUser)        // Admin only
-	app.Get("/user/:id", controller.GetUserById)   // Admin only
-	app.Post("/user", controller.CreateUser)       // Admin only
-	app.Put("/user/:id", controller.UpdateUser)    // Admin only
-	app.Delete("/user/:id", controller.DeleteUser) // Admin only
+	app.Get("/api/user", controller.GetAllUser)        // Admin only
+	app.Get("/api/user/:id", controller.GetUserById)   // Admin only
+	app.Post("/api/user", controller.CreateUser)       // Admin only
+	app.Put("/api/user/:id", controller.UpdateUser)    // Admin only
+	app.Delete("/api/user/:id", controller.DeleteUser) // Admin only
 
 	// MENU
-	app.Get("/menu", controller.GetAllMenu)        // Any
-	app.Get("/menu/:id", controller.GetMenuById)   // Any
-	app.Post("/menu", controller.CreateMenu)       // Admin only
-	app.Put("/menu/:id", controller.UpdateMenu)    // Admin only
-	app.Delete("/menu/:id", controller.DeleteMenu) // Admin only
+	app.Get("/api/menu", controller.GetAllMenu)        // Any
+	app.Get("/api/menu/:id", controller.GetMenuById)   // Any
+	app.Post("/api/menu", controller.CreateMenu)       // Admin only
+	app.Put("/api/menu/:id", controller.UpdateMenu)    // Admin only
+	app.Delete("/api/menu/:id", controller.DeleteMenu) // Admin only
 
 	// MEJA
-	app.Get("/meja", controller.GetAllMeja)             // Any
-	app.Get("/meja/:id", controller.GetMejaById)        // Any
-	app.Patch("/meja/:id", controller.UpdateStatusMeja) // Any
-	app.Post("/meja", controller.CreateMeja)            // Admin only
-	app.Put("/meja/:id", controller.UpdateMeja)         // Admin only
-	app.Delete("/meja/:id", controller.DeleteMeja)      // Admin only
+	app.Get("/api/meja", controller.GetAllMeja)             // Any
+	app.Get("/api/meja/:id", controller.GetMejaById)        // Any
+	app.Patch("/api/meja/:id", controller.UpdateStatusMeja) // Any
+	app.Post("/api/meja", controller.CreateMeja)            // Admin only
+	app.Put("/api/meja/:id", controller.UpdateMeja)         // Admin only
+	app.Delete("/api/meja/:id", controller.DeleteMeja)      // Admin only
 
 	// TRANSAKSI
-	app.Get("/transaksi", controller.GetAllTransaksi)             // Any
-	app.Get("/transaksi/:id", controller.GetTransaksiById)        // Any
-	app.Post("/transaksi", controller.CreateTransaksi)            // Kasir only
-	app.Patch("/transaksi/:id", controller.UpdateTransaksiStatus) // Kasir only
+	app.Get("/api/transaksi", controller.GetAllTransaksi)             // Any
+	app.Get("/api/transaksi/:id", controller.GetTransaksiById)        // Any
+	app.Post("/api/transaksi", controller.CreateTransaksi)            // Kasir only
+	app.Patch("/api/transaksi/:id", controller.UpdateTransaksiStatus) // Kasir only
 }
