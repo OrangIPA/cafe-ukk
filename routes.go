@@ -6,7 +6,7 @@ import (
 )
 
 func Routes(app *fiber.App) {
-	app.Post("/login", controller.LoginUser)
+	app.Post("/api/login", controller.LoginUser)
 
 }
 
