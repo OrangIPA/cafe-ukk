@@ -1,0 +1,52 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;200;300;400;500;600;700&display=swap");
+
+* {
+    font-family: 'Roboto Mono', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: black;
+    height: 100vh;
+    display: grid;
+    place-items: center;
+}
+
+main {
+    background-color: white;
+    color: black;
+    width: 35rem;
+    height: 30rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+main table {
+    border-spacing: 1rem;
+}
+
+main table tr td input {
+    border-style: none none solid none;
+    border-color: black;
+}
+
+main h1 {
+    margin-top: 2rem;
+}
+
+main button {
+    margin-bottom: 2rem;
+    padding: 0.5rem 1rem;
+    background-color: white;
+    color: black;
+    border: 1px solid black;
+    cursor: pointer;
+}
+
+main button:hover {
+    background-color: black;
+    color: white;
+}
