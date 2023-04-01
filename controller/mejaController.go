@@ -101,7 +101,7 @@ func UpdateStatusMeja(c *fiber.Ctx) error {
 	if err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	status := c.Params("status")
+	status := c.FormValue("status")
 	if status != "kosong" && status != "terisi" {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
